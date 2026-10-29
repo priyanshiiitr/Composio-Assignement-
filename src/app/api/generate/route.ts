@@ -20,10 +20,30 @@ function slugify(name: string) {
     .slice(0, 48);
 }
 
+async function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((_, reject) => {
+        timer = setTimeout(
+          () => reject(new Error(`${label} timed out after ${ms}ms`)),
+          ms,
+        );
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 export async function POST(req: Request) {
   if (!process.env.GROQ_API_KEY) {
     return Response.json(
-      { error: "GROQ_API_KEY is not set. Add it to .env.local" },
+      {
+        error:
+          "GROQ_API_KEY is not set on this deployment. Add it in Vercel → Settings → Environment Variables, then redeploy.",
+      },
       { status: 500 },
     );
   }
@@ -31,7 +51,10 @@ export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
   const query = typeof body.query === "string" ? body.query.trim() : "";
   if (!query || query.length > 200) {
-    return Response.json({ error: "Provide an app name or website (max 200 chars)." }, { status: 400 });
+    return Response.json(
+      { error: "Provide an app name or website (max 200 chars)." },
+      { status: 400 },
+    );
   }
   const sessionQueries = Array.isArray(body.sessionQueries)
     ? body.sessionQueries
@@ -49,35 +72,46 @@ export async function POST(req: Request) {
       };
 
       try {
-        send({ type: "progress", message: `Identifying provider from “${query}”…` });
+        send({
+          type: "progress",
+          message: `Identifying provider from “${query}”…`,
+        });
 
-        // llama-3.3-70b-versatile was shut down for free/dev tiers (Aug 2026)
         const modelId = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
         const model = groq(modelId);
 
-        send({ type: "progress", message: "Asking model for official doc URLs to fetch…" });
-        const urlPlan = await generateText({
-          model,
-          temperature: 0.2,
-          maxOutputTokens: 1024,
-          providerOptions: {
-            groq: {
-              reasoningEffort: "low",
-            },
-          },
-          prompt: `You help developers set up OAuth apps for AI agent integrations (Composio).
-Given this app query: "${query}"
-Return a JSON array of up to 5 absolute https URLs to official developer documentation about OAuth app creation, verification, or marketplace approval.
-Prefer vendor docs (developers.*, docs.*, api.*) over blogs.
-Also include Composio managed auth if relevant: https://docs.composio.dev/toolkits/managed-auth
-Return ONLY a JSON array of strings.`,
+        send({
+          type: "progress",
+          message: "Finding official docs (fast path + short model assist)…",
         });
 
         let plannedUrls: string[] = [];
         try {
+          const urlPlan = await withTimeout(
+            generateText({
+              model,
+              temperature: 0.2,
+              maxOutputTokens: 512,
+              providerOptions: {
+                groq: {
+                  reasoningEffort: "low",
+                },
+              },
+              prompt: `App query: "${query}"
+Return ONLY a JSON array of up to 3 official https documentation URLs about OAuth app creation or approval.
+Prefer developers.*/docs.*/api.* pages.
+Include https://docs.composio.dev/toolkits/managed-auth`,
+            }),
+            12000,
+            "Doc URL lookup",
+          );
           const match = urlPlan.text.match(/\[[\s\S]*\]/);
           if (match) plannedUrls = JSON.parse(match[0]) as string[];
         } catch {
+          send({
+            type: "progress",
+            message: "Doc URL lookup slow — continuing with known sources…",
+          });
           plannedUrls = [];
         }
 
@@ -119,18 +153,18 @@ Return ONLY a JSON array of strings.`,
           });
         }
 
-        const { object } = await generateObject({
-          model,
-          schema: oauthGuideSchema,
-          temperature: 0.2,
-          // gpt-oss spends completion budget on reasoning; default 1024 truncates JSON
-          maxOutputTokens: 16384,
-          providerOptions: {
-            groq: {
-              reasoningEffort: "low",
+        const { object } = await withTimeout(
+          generateObject({
+            model,
+            schema: oauthGuideSchema,
+            temperature: 0.2,
+            maxOutputTokens: 16384,
+            providerOptions: {
+              groq: {
+                reasoningEffort: "low",
+              },
             },
-          },
-          prompt: `Produce a concise OAuth setup + approval guide for Composio agent builders.
+            prompt: `Produce a concise OAuth setup + approval guide for Composio agent builders.
 
 Hard limits (keep the JSON short enough to finish):
 - summary: 1-2 sentences
@@ -147,7 +181,10 @@ ${sessionMemory}
 
 Research context:
 ${context}`,
-        });
+          }),
+          45000,
+          "Guide draft",
+        );
 
         const id = nanoid(10);
         const today = new Date().toISOString().slice(0, 10);
@@ -214,6 +251,7 @@ ${context}`,
     headers: {
       "Content-Type": "application/x-ndjson; charset=utf-8",
       "Cache-Control": "no-store",
+      "X-Accel-Buffering": "no",
     },
   });
 }

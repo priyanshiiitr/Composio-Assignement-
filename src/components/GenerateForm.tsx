@@ -10,6 +10,8 @@ type DoneEvent = { type: "done"; id: string; guide: OAuthGuide };
 type ErrorEvent = { type: "error"; message: string };
 type StreamEvent = ProgressEvent | DoneEvent | ErrorEvent;
 
+const CLIENT_TIMEOUT_MS = 90000;
+
 export function GenerateForm() {
   const router = useRouter();
   const [query, setQuery] = useState("");
@@ -25,6 +27,9 @@ export function GenerateForm() {
     setError(null);
     setLogs(["Starting investigation…"]);
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), CLIENT_TIMEOUT_MS);
+
     try {
       const res = await fetch("/api/generate", {
         method: "POST",
@@ -33,6 +38,7 @@ export function GenerateForm() {
           query: q,
           sessionQueries: getSessionQueries(),
         }),
+        signal: controller.signal,
       });
 
       if (!res.ok || !res.body) {
@@ -43,6 +49,7 @@ export function GenerateForm() {
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
+      let finished = false;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -52,10 +59,16 @@ export function GenerateForm() {
         buffer = lines.pop() || "";
         for (const line of lines) {
           if (!line.trim()) continue;
-          const event = JSON.parse(line) as StreamEvent;
+          let event: StreamEvent;
+          try {
+            event = JSON.parse(line) as StreamEvent;
+          } catch {
+            continue;
+          }
           if (event.type === "progress") {
             setLogs((prev) => [...prev, event.message]);
           } else if (event.type === "done") {
+            finished = true;
             saveGuideToSession(event.guide, q);
             window.dispatchEvent(new Event("oauth-pathfinder-session"));
             setLogs((prev) => [...prev, "Guide ready — opening…"]);
@@ -66,9 +79,20 @@ export function GenerateForm() {
           }
         }
       }
+
+      if (!finished) {
+        throw new Error(
+          "The investigation ended without a guide. Refresh and try again — if this persists, check GROQ_API_KEY on Vercel.",
+        );
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Generation failed");
+      if (err instanceof DOMException && err.name === "AbortError") {
+        setError("Timed out after 90s. Refresh and try again.");
+      } else {
+        setError(err instanceof Error ? err.message : "Generation failed");
+      }
     } finally {
+      clearTimeout(timeout);
       setBusy(false);
     }
   }
