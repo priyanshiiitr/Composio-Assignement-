@@ -1,0 +1,112 @@
+{
+  "id": "github",
+  "slug": "github",
+  "name": "GitHub",
+  "website": "https://github.com",
+  "composioToolkitSlugs": ["GITHUB"],
+  "managedStatus": "managed_optional",
+  "difficulty": 1,
+  "difficultyLabel": "Easy — same-day setup",
+  "timeEstimate": {
+    "setupHours": "15–45 minutes",
+    "approvalWait": "None for standard OAuth Apps",
+    "calendarTotal": "Same day"
+  },
+  "summary": "GitHub OAuth Apps are one of the fastest BYO paths. Create an OAuth App in developer settings, set Composio’s redirect URI, copy client ID/secret into a custom auth config. No marketplace review is required for normal OAuth Apps.",
+  "whenYouNeedThis": [
+    "You want your brand on the GitHub consent screen instead of Composio",
+    "You need scopes beyond Composio’s managed defaults",
+    "You want a dedicated rate-limit quota separate from the shared managed app"
+  ],
+  "prerequisites": [
+    "GitHub account",
+    "Permission to create an OAuth App (personal or organization)",
+    "Composio project access to create a custom auth config"
+  ],
+  "steps": [
+    {
+      "title": "Decide managed vs custom",
+      "detail": "Composio provides a managed GitHub OAuth app. Use managed for prototypes. Switch to custom when branding, scopes, or quota matter.",
+      "url": "https://docs.composio.dev/docs/authentication/custom-auth-configs",
+      "owner": "either"
+    },
+    {
+      "title": "Create a GitHub OAuth App",
+      "detail": "GitHub → Settings → Developer settings → OAuth Apps → New OAuth App. Set Homepage URL to your product URL.",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app",
+      "owner": "human"
+    },
+    {
+      "title": "Set Authorization callback URL",
+      "detail": "Use exactly: https://backend.composio.dev/api/v3/toolkits/auth/callback",
+      "owner": "human"
+    },
+    {
+      "title": "Copy Client ID and generate Client Secret",
+      "detail": "Generate a new client secret once and store it securely. You will paste both into Composio.",
+      "owner": "human"
+    },
+    {
+      "title": "Create Composio custom auth config",
+      "detail": "Dashboard → Create Auth Config → GitHub → OAuth2 → use your own credentials. Paste Client ID/Secret and confirm redirect URI.",
+      "url": "https://docs.composio.dev/docs/authentication/custom-app-vs-managed-app",
+      "owner": "human"
+    },
+    {
+      "title": "Wire auth config into your agent session",
+      "detail": "Pass the auth config ID when creating a session / initiating a connection so users authorize your app, not Composio’s.",
+      "owner": "either"
+    }
+  ],
+  "blockers": [
+    "Wrong callback URL (typos or trailing slash mismatches) breaks the redirect",
+    "Organization policies may restrict who can create OAuth Apps",
+    "Requesting sensitive org scopes may require org admin approval on install — not GitHub App review, but still a human gate"
+  ],
+  "nuances": [
+    "GitHub OAuth Apps ≠ GitHub Apps. This guide covers OAuth Apps used for user authorization.",
+    "No public marketplace approval is required to use an OAuth App with your own users.",
+    "User-to-server rate limits apply per OAuth App — your own app gets its own quota."
+  ],
+  "agentCanDo": [
+    "Confirm whether Composio managed auth is available for GITHUB",
+    "Draft the exact redirect URI and checklist",
+    "Locate official GitHub OAuth App docs and required fields",
+    "Explain scope tradeoffs for common agent use cases"
+  ],
+  "humanMustDo": [
+    "Log into GitHub and create the OAuth App",
+    "Generate and copy the client secret",
+    "Paste credentials into Composio (never share secrets with an agent chat)",
+    "Approve org-level access if an organization requires it"
+  ],
+  "nextAction": "If you only need to prototype: use Composio managed GitHub auth now. If production branding matters: create the GitHub OAuth App and set the Composio callback URL today — there is no approval queue.",
+  "composioHandoff": {
+    "redirectUri": "https://backend.composio.dev/api/v3/toolkits/auth/callback",
+    "notes": [
+      "Managed OAuth is available for GITHUB; custom auth is optional.",
+      "After creating the auth config, pass its ID when initiating connections."
+    ]
+  },
+  "sources": [
+    {
+      "title": "Creating an OAuth App (GitHub Docs)",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app"
+    },
+    {
+      "title": "Composio managed OAuth apps",
+      "url": "https://docs.composio.dev/toolkits/managed-auth"
+    },
+    {
+      "title": "Managed vs custom auth (Composio)",
+      "url": "https://docs.composio.dev/docs/authentication/custom-app-vs-managed-app"
+    }
+  ],
+  "evidenceNotes": [
+    "Verified against GitHub docs that OAuth App creation is self-serve with no review queue.",
+    "Verified Composio lists GITHUB under managed OAuth available.",
+    "Did not complete a live OAuth App create in this take-home (no credentials submitted)."
+  ],
+  "confidence": "docs_supported",
+  "lastChecked": "2026-10-28"
+}

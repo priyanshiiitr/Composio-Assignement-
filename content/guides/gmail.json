@@ -1,0 +1,134 @@
+{
+  "id": "gmail",
+  "slug": "gmail",
+  "name": "Gmail (Google)",
+  "website": "https://gmail.com",
+  "composioToolkitSlugs": ["GMAIL", "GOOGLECALENDAR", "GOOGLEDRIVE", "GOOGLESHEETS"],
+  "managedStatus": "managed_optional",
+  "difficulty": 5,
+  "difficultyLabel": "Hard — verification can dominate the schedule",
+  "timeEstimate": {
+    "setupHours": "2–6 hours to create Cloud project, OAuth client, consent screen, and Composio config",
+    "approvalWait": "Brand verification: often days. Sensitive scopes: additional review. Restricted scopes (many Gmail scopes): security assessment that can take weeks and may require a paid assessor",
+    "calendarTotal": "Prototype with test users: same week. Production with restricted Gmail scopes: often 4–12+ weeks — start early"
+  },
+  "summary": "Creating a Google OAuth client is straightforward; getting a production-ready Gmail app past Google’s verification is not. Testing can proceed with unverified apps and test users while verification runs. Composio managed Gmail auth avoids this until you need your own brand, scopes, or quota.",
+  "whenYouNeedThis": [
+    "Production users should see your app name (not Composio) on Google’s consent screen",
+    "You need Gmail scopes beyond managed defaults",
+    "Shared managed quota is insufficient",
+    "You are launching a user-facing product that reads/sends mail"
+  ],
+  "prerequisites": [
+    "Google Cloud project",
+    "Ability to configure OAuth consent screen (External vs Internal)",
+    "Verified ownership of your website domain (Search Console) for verification",
+    "Privacy policy URL (and often homepage / ToS)",
+    "For restricted scopes: readiness for security assessment (CASA) and possible assessor fees"
+  ],
+  "steps": [
+    {
+      "title": "Use managed auth while prototyping",
+      "detail": "Composio manages Gmail OAuth. Validate product value before starting Google verification.",
+      "url": "https://docs.composio.dev/toolkits/managed-auth",
+      "owner": "either"
+    },
+    {
+      "title": "Create Google Cloud project + OAuth client",
+      "detail": "APIs & Services → Credentials → Create OAuth client ID (Web application). Add authorized redirect URI: https://backend.composio.dev/api/v3/toolkits/auth/callback",
+      "url": "https://developers.google.com/identity/protocols/oauth2",
+      "owner": "human"
+    },
+    {
+      "title": "Configure OAuth consent screen",
+      "detail": "Set app name, support email, logo, privacy policy. Choose External for multi-tenant products. Add only required scopes.",
+      "url": "https://support.google.com/cloud/answer/10311615",
+      "owner": "human"
+    },
+    {
+      "title": "Enable Gmail API and minimize scopes",
+      "detail": "Prefer narrower scopes. Gmail restricted scopes trigger the heaviest review path.",
+      "url": "https://developers.google.com/gmail/api/auth/scopes",
+      "owner": "either"
+    },
+    {
+      "title": "Test with test users while unverified",
+      "detail": "Add test users on the consent screen. Unverified apps show warnings and have user caps — fine for development.",
+      "url": "https://support.google.com/cloud/answer/7454865",
+      "owner": "human"
+    },
+    {
+      "title": "Submit verification when going to production",
+      "detail": "Brand verification for name/logo. Sensitive/restricted scope verification as required. Restricted Gmail access may need a Letter of Assessment from an empanelled assessor.",
+      "url": "https://support.google.com/cloud/answer/13463073",
+      "owner": "human"
+    },
+    {
+      "title": "Create Composio custom auth config",
+      "detail": "Paste Client ID/Secret into Gmail (or Google toolkit) OAuth2 custom auth config and use that config ID for connections.",
+      "owner": "human"
+    }
+  ],
+  "blockers": [
+    "Restricted Gmail scopes requiring security assessment before broad production use",
+    "Unverified domain / missing privacy policy blocking verification submit",
+    "Scope creep after verification forcing re-review",
+    "Internal (Workspace-only) consent type mistakenly chosen for public users"
+  ],
+  "nuances": [
+    "“Create OAuth client” ≠ “app is production-approved.”",
+    "Non-sensitive scopes may only need brand verification to show your name/logo.",
+    "Annual re-verification/reassessment can apply for restricted-scope apps.",
+    "Many Google toolkits in Composio share Google Cloud OAuth patterns — one Cloud project can cover multiple APIs if scopes are planned carefully."
+  ],
+  "agentCanDo": [
+    "Classify likely scope sensitivity from your feature list",
+    "Draft consent screen and redirect URI checklist",
+    "Estimate calendar risk (prototype vs restricted production)",
+    "Pull official Google verification help links"
+  ],
+  "humanMustDo": [
+    "Own the Google Cloud project and OAuth client",
+    "Verify domain ownership",
+    "Publish privacy policy",
+    "Complete verification questionnaires and any paid security assessment",
+    "Handle Google’s review back-and-forth"
+  ],
+  "nextAction": "If launching soon with Gmail read/send for external users: create the Cloud project and start verification planning this week — do not wait until code is done. For demos, stay on Composio managed auth or test users.",
+  "composioHandoff": {
+    "redirectUri": "https://backend.composio.dev/api/v3/toolkits/auth/callback",
+    "notes": [
+      "Managed OAuth available for GMAIL and many Google toolkits.",
+      "Custom OAuth client is required for white-label production consent."
+    ]
+  },
+  "sources": [
+    {
+      "title": "Google OAuth 2.0",
+      "url": "https://developers.google.com/identity/protocols/oauth2"
+    },
+    {
+      "title": "Unverified apps",
+      "url": "https://support.google.com/cloud/answer/7454865"
+    },
+    {
+      "title": "OAuth App Verification Help Center",
+      "url": "https://support.google.com/cloud/answer/13463073"
+    },
+    {
+      "title": "Gmail API scopes",
+      "url": "https://developers.google.com/gmail/api/auth/scopes"
+    },
+    {
+      "title": "Composio managed OAuth apps",
+      "url": "https://docs.composio.dev/toolkits/managed-auth"
+    }
+  ],
+  "evidenceNotes": [
+    "Verification tiers and unverified-app behavior confirmed from Google Help Center.",
+    "Exact calendar time for restricted-scope assessment varies; treat 4–12+ weeks as planning guidance, not a guarantee.",
+    "Did not submit a Google verification request or CASA assessment."
+  ],
+  "confidence": "docs_supported",
+  "lastChecked": "2026-10-28"
+}

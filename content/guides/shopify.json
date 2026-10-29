@@ -1,0 +1,124 @@
+{
+  "id": "shopify",
+  "slug": "shopify",
+  "name": "Shopify",
+  "website": "https://www.shopify.com",
+  "composioToolkitSlugs": ["SHOPIFY"],
+  "managedStatus": "byo_required",
+  "difficulty": 4,
+  "difficultyLabel": "Harder — BYO required + Partner app review for public apps",
+  "timeEstimate": {
+    "setupHours": "2–5 hours for Partner account, app create, scopes, and Composio wiring",
+    "approvalWait": "Custom/unpublished apps for your own stores: often none beyond install. Public apps distributed via Shopify App Store: app review measured in business days to weeks depending on complexity and revisions",
+    "calendarTotal": "Days for a custom app on stores you control; weeks if you need App Store distribution"
+  },
+  "summary": "Shopify is listed under Composio’s Bring-your-own OAuth apps — there is no Composio-managed Shopify OAuth shortcut. You must create a Shopify app (Partner Dashboard), configure OAuth redirect, and supply client credentials. Public App Store distribution adds review; installing on stores you administer is a faster path.",
+  "whenYouNeedThis": [
+    "Your agent needs Shopify toolkit access in Composio — BYO is mandatory",
+    "You are connecting merchant stores via OAuth",
+    "You plan to list publicly in the Shopify App Store (extra review path)"
+  ],
+  "prerequisites": [
+    "Shopify Partner account",
+    "Development store for testing",
+    "Clear API scopes (Admin API access scopes)",
+    "App listing materials + privacy policy if submitting to the App Store",
+    "Composio project to store client ID/secret"
+  ],
+  "steps": [
+    {
+      "title": "Confirm managed auth is unavailable",
+      "detail": "Composio’s managed OAuth directory lists Shopify under Bring your own OAuth app. Plan credentials from day one.",
+      "url": "https://docs.composio.dev/toolkits/managed-auth",
+      "owner": "either"
+    },
+    {
+      "title": "Create a Partner app",
+      "detail": "Shopify Partners → Apps → Create app. Choose the app distribution model that matches your product (custom vs public).",
+      "url": "https://shopify.dev/docs/apps/build/authentication-authorization",
+      "owner": "human"
+    },
+    {
+      "title": "Configure OAuth redirect URLs",
+      "detail": "Add https://backend.composio.dev/api/v3/toolkits/auth/callback to Allowed redirection URLs / auth callback settings for your app version.",
+      "owner": "human"
+    },
+    {
+      "title": "Select Admin API scopes",
+      "detail": "Request least-privilege scopes for the agent’s tools. Excess scopes slow App Store review.",
+      "url": "https://shopify.dev/docs/api/usage/access-scopes",
+      "owner": "either"
+    },
+    {
+      "title": "Copy API key and secret into Composio",
+      "detail": "Create Shopify OAuth2 custom auth config with client ID/secret from the Partner Dashboard.",
+      "owner": "human"
+    },
+    {
+      "title": "Install on a development store and test",
+      "detail": "Complete OAuth install, verify token exchange via Composio connection, exercise read/write tools safely.",
+      "owner": "human"
+    },
+    {
+      "title": "Only then pursue App Store review",
+      "detail": "If merchants must discover you in the App Store, submit for app review with demo credentials and compliance docs.",
+      "url": "https://shopify.dev/docs/apps/launch/app-review",
+      "owner": "human"
+    }
+  ],
+  "blockers": [
+    "No Composio managed app — blocked until Partner credentials exist",
+    "App Store review rejections for missing GDPR/privacy flows, webhooks, or unjustified scopes",
+    "Custom app distribution limits which stores can install"
+  ],
+  "nuances": [
+    "“Works on my development store” is not the same as “approved public app.”",
+    "Shopify auth has evolved (session tokens, token exchange); follow current shopify.dev auth docs for your app type.",
+    "Protected customer data access may require additional approval tiers."
+  ],
+  "agentCanDo": [
+    "Confirm BYO-required status from Composio’s directory",
+    "Draft redirect URI + scope minimization checklist",
+    "Outline custom vs public distribution tradeoffs",
+    "Link official Shopify auth and app review docs"
+  ],
+  "humanMustDo": [
+    "Create Partner account and app",
+    "Configure redirect URLs and scopes in Partner Dashboard",
+    "Paste secrets into Composio",
+    "Provide review notes / demo store access for App Store submission"
+  ],
+  "nextAction": "Create a Shopify Partner app and development store first — you cannot skip BYO for this toolkit. Defer App Store submission until OAuth + Composio connection works on a dev store.",
+  "composioHandoff": {
+    "redirectUri": "https://backend.composio.dev/api/v3/toolkits/auth/callback",
+    "notes": [
+      "SHOPIFY requires bring-your-own OAuth credentials in Composio.",
+      "Create custom auth config before users can connect stores."
+    ]
+  },
+  "sources": [
+    {
+      "title": "Shopify authentication and authorization",
+      "url": "https://shopify.dev/docs/apps/build/authentication-authorization"
+    },
+    {
+      "title": "Shopify access scopes",
+      "url": "https://shopify.dev/docs/api/usage/access-scopes"
+    },
+    {
+      "title": "Shopify app review",
+      "url": "https://shopify.dev/docs/apps/launch/app-review"
+    },
+    {
+      "title": "Composio managed OAuth apps (BYO list includes Shopify)",
+      "url": "https://docs.composio.dev/toolkits/managed-auth"
+    }
+  ],
+  "evidenceNotes": [
+    "BYO requirement verified from Composio managed-auth directory (Shopify under Bring your own).",
+    "Auth and app review steps grounded in shopify.dev docs; exact App Store SLA varies.",
+    "Did not create a Partner app or submit App Store review in this take-home."
+  ],
+  "confidence": "docs_supported",
+  "lastChecked": "2026-10-28"
+}

@@ -1,0 +1,118 @@
+{
+  "id": "slack",
+  "slug": "slack",
+  "name": "Slack",
+  "website": "https://slack.com",
+  "composioToolkitSlugs": ["SLACK", "SLACKBOT"],
+  "managedStatus": "managed_optional",
+  "difficulty": 3,
+  "difficultyLabel": "Moderate — install is easy; Marketplace is not",
+  "timeEstimate": {
+    "setupHours": "1–3 hours for app create + scopes + Composio wiring",
+    "approvalWait": "None for distributing your own install link; Marketplace preliminary up to ~10 business days + functional review up to ~10 weeks",
+    "calendarTotal": "Same day for private/your users; weeks–months if you need Slack Marketplace listing"
+  },
+  "summary": "Creating a Slack app and completing OAuth for your customers can be done quickly. The hard path is Slack Marketplace approval: it requires real workspace installs before submission and has multi-week review. Most Composio agent builders only need installable OAuth — not Marketplace.",
+  "whenYouNeedThis": [
+    "Consent screen should show your app name",
+    "You need specific bot/user scopes beyond managed defaults",
+    "You want Marketplace discovery (optional, slow path)"
+  ],
+  "prerequisites": [
+    "Slack workspace where you can create apps",
+    "Clear list of bot and user scopes your agent needs",
+    "Privacy policy URL if pursuing Marketplace",
+    "For Marketplace: installs on 5+ active workspaces before submission"
+  ],
+  "steps": [
+    {
+      "title": "Create a Slack app",
+      "detail": "Go to api.slack.com/apps → Create New App → From scratch. Pick a development workspace.",
+      "url": "https://api.slack.com/authentication/oauth-v2",
+      "owner": "human"
+    },
+    {
+      "title": "Configure OAuth & Permissions",
+      "detail": "Add Redirect URL: https://backend.composio.dev/api/v3/toolkits/auth/callback. Select only the scopes you need.",
+      "owner": "human"
+    },
+    {
+      "title": "Install to a test workspace",
+      "detail": "Install the app, confirm OAuth works, and verify scopes. Broad history scopes invite scrutiny later if you pursue Marketplace.",
+      "owner": "human"
+    },
+    {
+      "title": "Copy Client ID and Client Secret",
+      "detail": "From Basic Information → App Credentials. Store the secret securely.",
+      "owner": "human"
+    },
+    {
+      "title": "Create Composio custom auth config",
+      "detail": "Slack → OAuth2 → your credentials. Pass auth config ID when initiating connections.",
+      "url": "https://docs.composio.dev/docs/authentication/custom-app-vs-managed-app",
+      "owner": "human"
+    },
+    {
+      "title": "Decide whether Marketplace is required",
+      "detail": "Skip Marketplace unless you need Slack’s directory. If you need it, gather 5 active workspace installs and prepare listing materials before submitting.",
+      "url": "https://api.slack.com/start/distributing",
+      "owner": "either"
+    }
+  ],
+  "blockers": [
+    "Marketplace submission blocked until 5+ active workspace installs (active = used in past 28 days)",
+    "Legacy or overly broad scopes (e.g. broad *:history without justification) can delay or block Marketplace review",
+    "Resubmitting during preliminary Marketplace review can restart the queue clock"
+  ],
+  "nuances": [
+    "Distributing via your own OAuth install link does not require Marketplace approval.",
+    "Slackbot vs Slack toolkit naming in Composio — pick the toolkit that matches bot vs user token needs.",
+    "Managed Slack OAuth exists in Composio; BYO mainly for branding, scopes, and quota."
+  ],
+  "agentCanDo": [
+    "Separate “create Slack app” timeline from “Marketplace approval” timeline",
+    "Draft a minimal scope list from your agent’s intended actions",
+    "Provide redirect URI and Composio wiring steps",
+    "Summarize Marketplace prerequisites from public docs"
+  ],
+  "humanMustDo": [
+    "Create the Slack app and set redirect URLs",
+    "Choose and justify scopes",
+    "Complete OAuth installs in real workspaces",
+    "Submit Marketplace materials if you choose that path"
+  ],
+  "nextAction": "Create the Slack app and set Composio’s redirect URI today. Do not start Marketplace review unless directory listing is a hard launch requirement.",
+  "composioHandoff": {
+    "redirectUri": "https://backend.composio.dev/api/v3/toolkits/auth/callback",
+    "notes": [
+      "Managed OAuth available for SLACK / SLACKBOT.",
+      "Custom auth config required for white-labeled consent."
+    ]
+  },
+  "sources": [
+    {
+      "title": "Slack OAuth V2",
+      "url": "https://api.slack.com/authentication/oauth-v2"
+    },
+    {
+      "title": "Distributing Slack apps",
+      "url": "https://api.slack.com/start/distributing"
+    },
+    {
+      "title": "Composio managed OAuth apps",
+      "url": "https://docs.composio.dev/toolkits/managed-auth"
+    },
+    {
+      "title": "WorkOS: Slack/Microsoft/Atlassian approval realities",
+      "url": "https://workos.com/blog/oauth-app-approval-slack-microsoft-atlassian",
+      "notes": "Secondary source for Marketplace timing/prereqs; cross-check Slack’s own distributing docs."
+    }
+  ],
+  "evidenceNotes": [
+    "OAuth install path verified from Slack API docs.",
+    "Marketplace 5-workspace prerequisite and multi-week review cited from distribution guidance / industry writeups — treat Marketplace ETA as approximate.",
+    "Did not submit a Marketplace app."
+  ],
+  "confidence": "docs_supported",
+  "lastChecked": "2026-10-28"
+}

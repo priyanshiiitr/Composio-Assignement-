@@ -1,0 +1,107 @@
+{
+  "id": "notion",
+  "slug": "notion",
+  "name": "Notion",
+  "website": "https://www.notion.so",
+  "composioToolkitSlugs": ["NOTION"],
+  "managedStatus": "managed_optional",
+  "difficulty": 2,
+  "difficultyLabel": "Easy–moderate — public vs internal matters",
+  "timeEstimate": {
+    "setupHours": "30–90 minutes",
+    "approvalWait": "None for internal; public distribution has extra checklist items",
+    "calendarTotal": "Same day for internal / your own users; longer if aiming for Notion’s public gallery"
+  },
+  "summary": "Notion integrations are quick to create. The main nuance is internal vs public: internal is enough for your agent’s users via OAuth; public distribution and gallery listing add requirements. Composio manages Notion OAuth if you do not need custom branding yet.",
+  "whenYouNeedThis": [
+    "Production consent should show your product name",
+    "You need capabilities or configuration beyond managed defaults",
+    "You are distributing a public Notion integration"
+  ],
+  "prerequisites": [
+    "Notion workspace where you can create integrations",
+    "Public website / privacy policy if making a public integration",
+    "Composio project for custom auth config"
+  ],
+  "steps": [
+    {
+      "title": "Open Notion My Integrations",
+      "detail": "Go to https://www.notion.so/my-integrations and create a new integration.",
+      "url": "https://developers.notion.com/docs/authorization",
+      "owner": "human"
+    },
+    {
+      "title": "Choose internal vs public",
+      "detail": "Internal: workspace-scoped, fastest for testing. Public: OAuth for any Notion user — required pattern for a multi-tenant agent product.",
+      "owner": "human"
+    },
+    {
+      "title": "Configure OAuth redirect URI",
+      "detail": "For public integrations, add https://backend.composio.dev/api/v3/toolkits/auth/callback as a redirect URI.",
+      "owner": "human"
+    },
+    {
+      "title": "Copy OAuth client credentials",
+      "detail": "Copy OAuth client ID and client secret (public integrations) into Composio custom auth config.",
+      "owner": "human"
+    },
+    {
+      "title": "Remember page sharing",
+      "detail": "Notion requires users to explicitly share pages/databases with the integration after connect. Plan UX copy for that step.",
+      "url": "https://developers.notion.com/docs/authorization",
+      "owner": "either"
+    },
+    {
+      "title": "Create Composio auth config",
+      "detail": "Create Notion OAuth2 custom auth config with your credentials, then pass the config ID into connection initiation.",
+      "owner": "human"
+    }
+  ],
+  "blockers": [
+    "Using an internal-only integration when you need multi-workspace OAuth",
+    "Users connect but forget to share pages — API calls return empty/403",
+    "Public integration checklist (links, icons, privacy policy) if you pursue gallery distribution"
+  ],
+  "nuances": [
+    "Capability tokens / page access model is unique to Notion — OAuth alone is not enough for content access.",
+    "Composio lists NOTION under managed OAuth; BYO is for branding/control, not because managed is missing.",
+    "Notion MCP toolkit (NOTION_MCP) may be listed separately as BYO in Composio’s catalog — check the slug you actually use."
+  ],
+  "agentCanDo": [
+    "Explain internal vs public integration tradeoffs",
+    "Draft redirect URI and Composio handoff steps",
+    "Flag the share-pages UX requirement",
+    "Point to Notion authorization docs"
+  ],
+  "humanMustDo": [
+    "Create the integration in Notion’s UI",
+    "Toggle public and set redirect URIs if multi-tenant",
+    "Host privacy policy if required for public distribution",
+    "Paste secrets into Composio"
+  ],
+  "nextAction": "Create a public Notion integration if end users are outside your workspace, set the Composio redirect URI, then create a Composio custom auth config. If prototyping alone, use managed Notion auth first.",
+  "composioHandoff": {
+    "redirectUri": "https://backend.composio.dev/api/v3/toolkits/auth/callback",
+    "notes": [
+      "Managed OAuth available for NOTION.",
+      "After OAuth, remind users to share Notion pages with the integration."
+    ]
+  },
+  "sources": [
+    {
+      "title": "Notion Authorization",
+      "url": "https://developers.notion.com/docs/authorization"
+    },
+    {
+      "title": "Composio managed OAuth apps",
+      "url": "https://docs.composio.dev/toolkits/managed-auth"
+    }
+  ],
+  "evidenceNotes": [
+    "Authorization model (internal vs public, share pages) confirmed from Notion developer docs.",
+    "Did not submit a public integration for Notion gallery review.",
+    "Composio managed status taken from public managed-auth directory."
+  ],
+  "confidence": "docs_supported",
+  "lastChecked": "2026-10-28"
+}
